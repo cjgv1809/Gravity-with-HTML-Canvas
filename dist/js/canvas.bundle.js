@@ -96,7 +96,6 @@
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils */ "./src/js/utils.js");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_utils__WEBPACK_IMPORTED_MODULE_0__);
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -104,62 +103,89 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 
-var canvas = document.querySelector('canvas');
-var c = canvas.getContext('2d');
+var canvas = document.querySelector("canvas");
+var c = canvas.getContext("2d");
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 var mouse = {
   x: innerWidth / 2,
   y: innerHeight / 2
 };
-var colors = ['#2185C5', '#7ECEFD', '#FFF6E5', '#FF7F66']; // Event Listeners
+var colors = ["#161853", "#292C6D", "#FAEDF0", "#EC255A"];
+var gravity = 1;
+var friction = 0.79; // Event Listeners
 
-addEventListener('mousemove', function (event) {
+addEventListener("mousemove", function (event) {
   mouse.x = event.clientX;
   mouse.y = event.clientY;
 });
-addEventListener('resize', function () {
+addEventListener("resize", function () {
   canvas.width = innerWidth;
   canvas.height = innerHeight;
   init();
+});
+addEventListener("click", function () {
+  init();
 }); // Objects
 
-var _Object = /*#__PURE__*/function () {
-  function Object(x, y, radius, color) {
-    _classCallCheck(this, Object);
+var Ball = /*#__PURE__*/function () {
+  function Ball(x, y, dx, dy, radius, color) {
+    _classCallCheck(this, Ball);
 
     this.x = x;
     this.y = y;
+    this.dx = dx;
+    this.dy = dy;
     this.radius = radius;
     this.color = color;
   }
 
-  _createClass(Object, [{
+  _createClass(Ball, [{
     key: "draw",
     value: function draw() {
       c.beginPath();
       c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
       c.fillStyle = this.color;
       c.fill();
+      c.stroke();
       c.closePath();
     }
   }, {
     key: "update",
     value: function update() {
+      if (this.y + this.radius + this.dy > canvas.height) {
+        this.dy = -this.dy * friction;
+      } else {
+        this.dy += gravity;
+      }
+
+      if (this.x + this.radius + this.dx > canvas.width || this.x - this.radius <= 0) {
+        this.dx = -this.dx;
+      }
+
+      this.x += this.dx;
+      this.y += this.dy;
       this.draw();
     }
   }]);
 
-  return Object;
+  return Ball;
 }(); // Implementation
 
 
-var objects;
+var ballArray = [];
 
 function init() {
-  objects = [];
+  ballArray = [];
 
-  for (var i = 0; i < 400; i++) {// objects.push()
+  for (var i = 0; i < 100; i++) {
+    var radius = Object(_utils__WEBPACK_IMPORTED_MODULE_0__["randomIntFromRange"])(8, 20);
+    var x = Object(_utils__WEBPACK_IMPORTED_MODULE_0__["randomIntFromRange"])(radius, canvas.width - radius);
+    var y = Object(_utils__WEBPACK_IMPORTED_MODULE_0__["randomIntFromRange"])(0, canvas.height - radius);
+    var dx = Object(_utils__WEBPACK_IMPORTED_MODULE_0__["randomIntFromRange"])(-2, 2);
+    var dy = Object(_utils__WEBPACK_IMPORTED_MODULE_0__["randomIntFromRange"])(-2, 2);
+    var color = Object(_utils__WEBPACK_IMPORTED_MODULE_0__["randomColor"])(colors);
+    ballArray.push(new Ball(x, y, dx, dy, radius, color));
   }
 } // Animation Loop
 
@@ -167,9 +193,10 @@ function init() {
 function animate() {
   requestAnimationFrame(animate);
   c.clearRect(0, 0, canvas.width, canvas.height);
-  c.fillText('HTML CANVAS BOILERPLATE', mouse.x, mouse.y); // objects.forEach(object => {
-  //  object.update()
-  // })
+
+  for (var i = 0; i < ballArray.length; i++) {
+    ballArray[i].update();
+  }
 }
 
 init();
@@ -181,9 +208,14 @@ animate();
 /*!*************************!*\
   !*** ./src/js/utils.js ***!
   \*************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/*! exports provided: randomIntFromRange, randomColor, distance */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "randomIntFromRange", function() { return randomIntFromRange; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "randomColor", function() { return randomColor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "distance", function() { return distance; });
 function randomIntFromRange(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -198,11 +230,7 @@ function distance(x1, y1, x2, y2) {
   return Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2));
 }
 
-module.exports = {
-  randomIntFromRange: randomIntFromRange,
-  randomColor: randomColor,
-  distance: distance
-};
+
 
 /***/ })
 
